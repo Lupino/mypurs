@@ -1,0 +1,22 @@
+{
+  "name": "mypurs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "postinstall": "bower cache clean && bower install && npm run build",
+    "build": "pulp build --to index.js",
+    "watch": "pulp -w build --to index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "bower": "^1.8.4",
+    "pulp": "^12.2.0",
+    "purescript": "^0.11.7"
+  }
+}
