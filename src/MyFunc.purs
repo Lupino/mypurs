@@ -3,8 +3,12 @@ module MyFunc
   , add1
   , randInt
   , randInt1
+  , maybeBigZero
+  , eitherBigZero
   ) where
 
+import Data.Maybe (Maybe (..))
+import Data.Either(Either (..))
 import Control.Monad.Eff (Eff)
 import Data.Function.Uncurried (Fn2, runFn2)
 
@@ -19,3 +23,12 @@ foreign import _randInt1 :: forall eff. Fn2 Int Int (Eff eff Int)
 
 randInt1 :: forall eff. Int -> Int -> Eff eff Int
 randInt1 a b = runFn2 _randInt1 a b
+
+foreign import _maybeBigZero :: Int -> Maybe Int -> (Int -> Maybe Int) -> Maybe Int
+foreign import _eitherBigZero :: Int -> (String -> Either String Int) -> (Int -> Either String Int) -> Either String Int
+
+maybeBigZero :: Int -> Maybe Int
+maybeBigZero a = _maybeBigZero a Nothing Just
+
+eitherBigZero :: Int -> Either String Int
+eitherBigZero a = _eitherBigZero a Left Right

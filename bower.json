@@ -9,7 +9,9 @@
   "dependencies": {
     "purescript-prelude": "^3.3.0",
     "purescript-console": "^3.0.0",
-    "purescript-functions": "^3.0.0"
+    "purescript-functions": "^3.0.0",
+    "purescript-maybe": "^3.1.0",
+    "purescript-either": "^3.2.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0"
