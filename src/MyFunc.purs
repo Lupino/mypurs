@@ -5,8 +5,11 @@ module MyFunc
   , randInt1
   , maybeBigZero
   , eitherBigZero
+  , readText
   ) where
 
+import Prelude
+import Control.Monad.Eff.Exception (Error)
 import Data.Maybe (Maybe (..))
 import Data.Either(Either (..))
 import Control.Monad.Eff (Eff)
@@ -32,3 +35,13 @@ maybeBigZero a = _maybeBigZero a Nothing Just
 
 eitherBigZero :: Int -> Either String Int
 eitherBigZero a = _eitherBigZero a Left Right
+
+foreign import _readText
+  :: forall eff. String
+  -> (Error -> Either Error String)
+  -> (String -> Either Error String)
+  -> (Either Error String -> Eff eff Unit)
+  -> Eff eff Unit
+
+readText :: forall eff. String -> (Either Error String -> Eff eff Unit) -> Eff eff Unit
+readText fn = _readText fn Left Right

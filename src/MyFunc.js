@@ -45,3 +45,23 @@ exports._eitherBigZero = function(a) {
     }
   }
 }
+
+var fs = require('fs');
+exports._readText = function(fn) {
+  return function(left) {
+    return function(right) {
+      return function(cb) {
+        return function() {
+          fs.readFile(fn, (function(err, text) {
+            if (err) {
+              return cb(left(err))();
+            } else {
+              return cb(right(text.toString()))();
+            }
+          }));
+          return {}
+        }
+      }
+    }
+  }
+}

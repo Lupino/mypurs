@@ -3,7 +3,9 @@ module Main where
 import Prelude hiding (add)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import MyFunc (add, add1, randInt, randInt1, maybeBigZero, eitherBigZero)
+import MyFunc (add, add1, randInt, randInt1, maybeBigZero, eitherBigZero, readText)
+import Data.Either (Either (..))
+import Control.Monad.Eff.Exception (message)
 
 main :: forall e. Eff (console :: CONSOLE | e) Unit
 main = do
@@ -15,4 +17,8 @@ main = do
   log $ show $ r1
   log $ show $ maybeBigZero 10
   log $ show $ eitherBigZero 10
+  readText "bower.json" $ \r ->
+    case r of
+         Left e -> log $ message e
+         Right s -> log s
   log "Hello sailor!"
