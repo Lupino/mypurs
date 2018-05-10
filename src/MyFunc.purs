@@ -8,6 +8,7 @@ module MyFunc
   , readText
   , readTextAff
   , readTextAff1
+  , readTextAff2
   ) where
 
 import Prelude
@@ -18,6 +19,8 @@ import Control.Monad.Eff (Eff)
 import Data.Function.Uncurried (Fn2, runFn2)
 import Control.Monad.Aff (Aff, makeAff, nonCanceler, Canceler)
 import Control.Monad.Aff.Compat (fromEffFnAff, EffFnAff)
+import Control.Monad.Eff.Class (liftEff)
+import Control.Promise (Promise, toAff)
 
 foreign import add :: Int -> Int -> Int
 foreign import _add1 :: Fn2 Int Int Int
@@ -59,3 +62,8 @@ foreign import _readTextAff1 :: forall eff. String -> EffFnAff eff String
 
 readTextAff1 :: forall eff. String -> Aff eff String
 readTextAff1 = fromEffFnAff <<< _readTextAff1
+
+foreign import _readTextAff2 :: forall eff. String -> Eff eff (Promise String)
+
+readTextAff2 :: forall eff. String -> Aff eff String
+readTextAff2 fn = liftEff (_readTextAff2 fn) >>= toAff

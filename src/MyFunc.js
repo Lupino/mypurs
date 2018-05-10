@@ -82,3 +82,17 @@ exports._readTextAff1 = function(fn) {
     };
   }
 }
+
+exports._readTextAff2 = function(fn) {
+  return function() {
+    return new Promise(function(resolve, reject) {
+      fs.readFile(fn, function(err, text) {
+        if (err) {
+          return reject(err);
+        } else {
+          return resolve(text.toString());
+        }
+      })
+    });
+  }
+}
