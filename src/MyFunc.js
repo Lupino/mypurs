@@ -65,3 +65,20 @@ exports._readText = function(fn) {
     }
   }
 }
+
+exports._readTextAff1 = function(fn) {
+  return function(onError, onSuccess) {
+    fs.readFile(fn, function(err, text) {
+      if (err) {
+        onError(err);
+      } else {
+        onSuccess(text.toString());
+      }
+    });
+
+    // Return a canceler, which is just another Aff effect.
+    return function (cancelError, cancelerError, cancelerSuccess) {
+      cancelerSuccess(); // invoke the success callback for the canceler
+    };
+  }
+}

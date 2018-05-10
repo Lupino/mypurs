@@ -3,7 +3,7 @@ module Main where
 import Prelude hiding (add)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import MyFunc (add, add1, randInt, randInt1, maybeBigZero, eitherBigZero, readText, readTextAff)
+import MyFunc (add, add1, randInt, randInt1, maybeBigZero, eitherBigZero, readText, readTextAff, readTextAff1)
 import Data.Either (Either (..))
 import Control.Monad.Eff.Exception (message)
 import Control.Monad.Eff.Class (liftEff)
@@ -27,3 +27,5 @@ main = do
   launchAff_ $ do
     r3 <- readTextAff "bower.json"
     liftEff $ log r3
+    r4 <- readTextAff1 "bower.json"
+    liftEff $ log r4
