@@ -6,6 +6,7 @@ module MyFunc
   , maybeBigZero
   , eitherBigZero
   , readText
+  , readTextAff
   ) where
 
 import Prelude
@@ -14,6 +15,7 @@ import Data.Maybe (Maybe (..))
 import Data.Either(Either (..))
 import Control.Monad.Eff (Eff)
 import Data.Function.Uncurried (Fn2, runFn2)
+import Control.Monad.Aff (Aff, makeAff, nonCanceler, Canceler)
 
 foreign import add :: Int -> Int -> Int
 foreign import _add1 :: Fn2 Int Int Int
@@ -45,3 +47,8 @@ foreign import _readText
 
 readText :: forall eff. String -> (Either Error String -> Eff eff Unit) -> Eff eff Unit
 readText fn = _readText fn Left Right
+
+readTextAff :: forall eff. String -> Aff eff String
+readTextAff fn = makeAff wrapper
+  where wrapper :: (Either Error String → Eff eff Unit) → Eff eff (Canceler eff)
+        wrapper cb = readText fn cb $> nonCanceler
