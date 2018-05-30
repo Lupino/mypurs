@@ -7,18 +7,18 @@ module MyMonadTrans
   ) where
 
 import Prelude
-import Control.Monad.Eff.Ref (REF, Ref, newRef, readRef, modifyRef)
+import Effect.Ref (Ref, new, read, modify)
 import Data.Newtype (class Newtype)
-import Control.Monad.Eff.Class (class MonadEff, liftEff)
-import Control.Monad.Aff.Class (class MonadAff, liftAff)
+import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Aff.Class (class MonadAff, liftAff)
 import Control.Monad.Trans.Class (class MonadTrans)
-import Control.Monad.Eff (Eff)
+import Effect (Effect)
 import Data.Array ((:), delete)
 
 newtype WhitelistT m a = WhitelistT (Ref (Array String) -> m a)
 
-runWhitelistT :: forall eff m a. MonadEff (ref :: REF| eff) m => WhitelistT m a -> m a
-runWhitelistT (WhitelistT f) = f =<< liftEff (newRef [])
+runWhitelistT :: forall m a. MonadEffect m => WhitelistT m a -> m a
+runWhitelistT (WhitelistT f) = f =<< liftEffect (new [])
 
 derive instance newtypeWhitelistT :: Newtype (WhitelistT m a) _
 
@@ -39,29 +39,29 @@ instance bindWhitelistT :: Monad m => Bind (WhitelistT m) where
 instance applyWhitelistT :: Monad m => Apply (WhitelistT m) where
   apply = ap
 
-instance monadEffWhitelistT :: MonadEff eff m => MonadEff eff (WhitelistT m) where
-  liftEff = WhitelistT <<< const <<< liftEff
+instance monadEffectWhitelistT :: MonadEffect m => MonadEffect (WhitelistT m) where
+  liftEffect = WhitelistT <<< const <<< liftEffect
 
-instance monadAffWhitelistT :: MonadAff eff m => MonadAff eff (WhitelistT m) where
+instance monadAffWhitelistT :: MonadAff m => MonadAff (WhitelistT m) where
   liftAff = WhitelistT <<< const <<< liftAff
 
 instance monadTransWhitelistT :: MonadTrans WhitelistT where
   lift = WhitelistT <<< const
 
-add_ :: forall eff. String -> Ref (Array String) -> Eff (ref :: REF | eff) Unit
-add_ s ref = modifyRef ref $ (s : _)
+add_ :: String -> Ref (Array String) -> Effect Unit
+add_ s = void <<< modify (s : _)
 
-del_ :: forall eff. String -> Ref (Array String) -> Eff (ref :: REF | eff) Unit
-del_ s ref = modifyRef ref $ delete s
+del_ :: String -> Ref (Array String) -> Effect Unit
+del_ s = void <<< modify (delete s)
 
-get_ :: forall eff. Ref (Array String) -> Eff (ref :: REF | eff) (Array String)
-get_ = readRef
+get_ :: Ref (Array String) -> Effect (Array String)
+get_ = read
 
-add :: forall eff m. MonadEff (ref :: REF | eff) m => String -> WhitelistT m Unit
-add s = WhitelistT $ liftEff <<< add_ s
+add :: forall m. MonadEffect m => String -> WhitelistT m Unit
+add s = WhitelistT $ liftEffect <<< add_ s
 
-del :: forall eff m. MonadEff (ref :: REF | eff) m => String -> WhitelistT m Unit
-del s = WhitelistT $ liftEff <<< del_ s
+del :: forall m. MonadEffect m => String -> WhitelistT m Unit
+del s = WhitelistT $ liftEffect <<< del_ s
 
-get :: forall eff m. MonadEff (ref :: REF | eff) m => WhitelistT m (Array String)
-get = WhitelistT $ liftEff <<< get_
+get :: forall m. MonadEffect m => WhitelistT m (Array String)
+get = WhitelistT $ liftEffect <<< get_

@@ -7,53 +7,53 @@ module MyMonad
   ) where
 
 import Prelude
-import Control.Monad.Eff.Ref (REF, Ref, newRef, readRef, modifyRef)
+import Effect.Ref (Ref, new, read, modify)
 import Data.Newtype (class Newtype)
-import Control.Monad.Eff.Class (class MonadEff, liftEff)
-import Control.Monad.Eff (Eff)
+import Effect.Class (class MonadEffect, liftEffect)
+import Effect (Effect)
 import Data.Array ((:), delete)
 
-newtype WhitelistM eff a = WhitelistM (Ref (Array String) -> Eff eff a)
+newtype WhitelistM a = WhitelistM (Ref (Array String) -> Effect a)
 
-runWhitelistM :: forall eff a. WhitelistM (ref :: REF | eff) a -> Eff (ref :: REF | eff) a
-runWhitelistM (WhitelistM f) = f =<< newRef []
+runWhitelistM :: forall a. WhitelistM a -> Effect a
+runWhitelistM (WhitelistM f) = f =<< new []
 
-derive instance newtypeWhitelistM :: Newtype (WhitelistM eff a) _
+derive instance newtypeWhitelistM :: Newtype (WhitelistM a) _
 
-instance functorWhitilistM :: Functor (WhitelistM eff) where
+instance functorWhitilistM :: Functor WhitelistM where
   map f (WhitelistM g) = WhitelistM $ map f <<< g
 
-instance applicativeWhitelistM :: Applicative (WhitelistM eff) where
+instance applicativeWhitelistM :: Applicative WhitelistM where
   pure = WhitelistM <<< const <<< pure
 
-instance monadWhitelistM :: Monad (WhitelistM eff)
+instance monadWhitelistM :: Monad WhitelistM
 
-instance bindWhitelistM :: Bind (WhitelistM eff) where
+instance bindWhitelistM :: Bind WhitelistM where
   bind (WhitelistM m) k = WhitelistM $ \ref -> do
      r <- m ref
      case k r of
        WhitelistM m0 -> m0 ref
 
-instance applyWhitelistM :: Apply (WhitelistM eff) where
+instance applyWhitelistM :: Apply WhitelistM where
   apply = ap
 
-instance monadEffWhitelistM :: MonadEff eff (WhitelistM eff) where
-  liftEff = WhitelistM <<< const
+instance monadEffectWhitelistM :: MonadEffect WhitelistM where
+  liftEffect = WhitelistM <<< const
 
-add_ :: forall eff. String -> Ref (Array String) -> Eff (ref :: REF | eff) Unit
-add_ s ref = modifyRef ref $ (s : _)
+add_ :: String -> Ref (Array String) -> Effect Unit
+add_ s = void <<< modify (s : _)
 
-del_ :: forall eff. String -> Ref (Array String) -> Eff (ref :: REF | eff) Unit
-del_ s ref = modifyRef ref $ delete s
+del_ :: String -> Ref (Array String) -> Effect Unit
+del_ s = void <<< modify (delete s)
 
-get_ :: forall eff. Ref (Array String) -> Eff (ref :: REF | eff) (Array String)
-get_ = readRef
+get_ :: Ref (Array String) -> Effect (Array String)
+get_ = read
 
-add :: forall eff. String -> WhitelistM (ref :: REF | eff) Unit
+add :: String -> WhitelistM Unit
 add s = WhitelistM $ add_ s
 
-del :: forall eff. String -> WhitelistM (ref :: REF | eff) Unit
+del :: String -> WhitelistM Unit
 del s = WhitelistM $ del_ s
 
-get :: forall eff. WhitelistM (ref :: REF | eff) (Array String)
+get :: WhitelistM (Array String)
 get = WhitelistM $ get_

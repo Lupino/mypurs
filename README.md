@@ -5,7 +5,7 @@ PureScript 是一门函数式编程语言，强类型并且以 JavaScript 作为
 本场 Chat 内容大致如下：
 
 1. 快速搭建编译环境；
-2. Eff 和 Aff 与外界沟通；
+2. Effect 和 Aff 与外界沟通；
 3. 神奇的 Monad；
 4. MonadTrans 是个好东西；
 5. 与 JavaScript 混编；

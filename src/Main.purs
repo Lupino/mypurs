@@ -1,26 +1,25 @@
 module Main where
 
 import Prelude hiding (add)
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
+import Effect (Effect)
+import Effect.Console (log)
 import MyFunc (add, add1, randInt, randInt1, maybeBigZero, eitherBigZero, readText, readTextAff, readTextAff1, readTextAff2)
 import Data.Either (Either (..))
-import Control.Monad.Eff.Exception (message)
-import Control.Monad.Eff.Class (class MonadEff, liftEff)
-import Control.Monad.Aff (launchAff_)
+import Effect.Exception (message)
+import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Aff (launchAff_)
 import MyMonad as MyMonad
 import MyMonad (WhitelistM, runWhitelistM)
 import MyMonadTrans as MyMonadT
 import MyMonadTrans (WhitelistT, runWhitelistT)
-import Control.Monad.Eff.Ref (REF)
 
-logWhitelistM :: forall eff. WhitelistM (ref :: REF, console :: CONSOLE | eff) Unit
-logWhitelistM = MyMonad.get >>= (liftEff <<< log <<< show)
+logWhitelistM :: WhitelistM Unit
+logWhitelistM = MyMonad.get >>= (liftEffect <<< log <<< show)
 
-logWhitelistT :: forall eff m. MonadEff (ref :: REF, console :: CONSOLE | eff) m => WhitelistT m Unit
-logWhitelistT = MyMonadT.get >>= (liftEff <<< log <<< show)
+logWhitelistT :: forall m. MonadEffect m => WhitelistT m Unit
+logWhitelistT = MyMonadT.get >>= (liftEffect <<< log <<< show)
 
-main :: forall e. Eff (ref :: REF, console :: CONSOLE | e) Unit
+main :: Effect Unit
 main = do
   log $ show $ add 1 2
   log $ show $ add1 1 2
@@ -36,15 +35,15 @@ main = do
          Right s -> log s
 
   launchAff_ $ do
-    liftEff $ log "test readTextAff"
+    liftEffect $ log "test readTextAff"
     r3 <- readTextAff "bower.json"
-    liftEff $ log r3
-    liftEff $ log "test readTextAff1"
+    liftEffect $ log r3
+    liftEffect $ log "test readTextAff1"
     r4 <- readTextAff1 "bower.json"
-    liftEff $ log r4
-    liftEff $ log "test readTextAff2"
+    liftEffect $ log r4
+    liftEffect $ log "test readTextAff2"
     r5 <- readTextAff2 "bower.json"
-    liftEff $ log r5
+    liftEffect $ log r5
 
   runWhitelistM $ do
     MyMonad.add "test0"
@@ -57,13 +56,13 @@ main = do
     logWhitelistM
 
   runWhitelistT $ do
-    MyMonadT.add "test0 trans Eff"
-    MyMonadT.add "test1 trans Eff"
-    MyMonadT.add "test2 trans Eff"
+    MyMonadT.add "test0 trans Effect"
+    MyMonadT.add "test1 trans Effect"
+    MyMonadT.add "test2 trans Effect"
     logWhitelistT
-    MyMonadT.add "test3 trans Eff"
+    MyMonadT.add "test3 trans Effect"
     logWhitelistT
-    MyMonadT.del "test2 trans Eff"
+    MyMonadT.del "test2 trans Effect"
     logWhitelistT
   launchAff_ $ runWhitelistT $ do
     MyMonadT.add "test0 trans Aff"
